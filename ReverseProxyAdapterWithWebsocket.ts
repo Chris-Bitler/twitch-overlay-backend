@@ -34,6 +34,10 @@ export class ReverseProxyAdapterWithWebsocket extends ConnectionAdapter {
         return server;
     }
 
+    getListenerPort(): Promise<number | undefined> {
+        return Promise.resolve(this.port);
+    }
+
     getHostName(): Promise<string> {
         return Promise.resolve(this.hostname);
     }
