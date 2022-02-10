@@ -29,7 +29,9 @@ export class EventHandler {
             if (messageObject.type === 'ADD_USER') {
                 const twitchUser = await this.apiClient.users.getUsersByNames([messageObject.user]);
                 if (twitchUser.length > 0) {
-                    this.usersHandlerListeningTo.push(twitchUser[0].id);
+                    const id = twitchUser[0].id;
+                    this.usersHandlerListeningTo.push(id);
+                    this.subscriptionHandler.attemptSubscribe(id);
                 }
             }
         });
