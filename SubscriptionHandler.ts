@@ -1,7 +1,5 @@
-import {EventSubMiddleware, EventSubSubscription} from "@twurple/eventsub";
-import {EventSubBase} from "@twurple/eventsub/lib/EventSubBase";
+import { EventSubMiddleware } from "@twurple/eventsub";
 import { EventHandler } from "./EventHandler";
-import {EventNameToPrefixMapper} from "./EventNameToPrefixMapper";
 
 export class SubscriptionHandler {
     private middlewareInstance: EventSubMiddleware;
