@@ -12,7 +12,7 @@ const apiClient = new ApiClient({ authProvider });
 
 const adapter = new ReverseProxyAdapter({
     hostName: process.env.HOSTNAME,
-    port: 80
+    port: process.env.PORT
 });
 
 const listener = new EventSubListener({ apiClient, adapter, secret: eventSubSecret});
