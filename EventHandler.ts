@@ -58,7 +58,7 @@ export class EventHandler {
 
     handleRaid(event: EventSubChannelRaidEvent) {
         if (this.usersHandlerListeningTo.includes(event.raidedBroadcasterId)) {
-            this.socket?.send({
+            this.send(this.socket!!, {
                 type: 'RAID',
                 raider: event.raidingBroadcasterDisplayName,
                 viewers: event.viewers
@@ -71,7 +71,7 @@ export class EventHandler {
         this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
         if(!event.isGift && this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             // TODO: Query sub length here
-            this.socket?.send({
+            this.send(this.socket!!, {
                 type: 'SUB',
                 subber: event.userDisplayName
             });
@@ -80,7 +80,7 @@ export class EventHandler {
 
     handleGiftSub(event: EventSubChannelSubscriptionGiftEvent) {
         if (this.usersHandlerListeningTo.includes(event.broadcasterId)) {
-            this.socket?.send({
+            this.send(this.socket!!,{
                 type: 'GIFT_SUB',
                 gifter: event.gifterDisplayName,
                 giftAmount: event.amount,
@@ -91,7 +91,7 @@ export class EventHandler {
 
     handleFollow(event: EventSubChannelFollowEvent) {
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
-            this.socket?.send({
+            this.send(this.socket!!,{
                 type: 'FOLLOW',
                 follower: event.userDisplayName
             })
@@ -100,7 +100,7 @@ export class EventHandler {
 
     handleCheer(event: EventSubChannelCheerEvent) {
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
-            this.socket?.send({
+            this.send(this.socket!!,{
                 type: 'CHEER',
                 cheerer: event.userDisplayName,
                 amount: event.bits
@@ -110,11 +110,15 @@ export class EventHandler {
 
     handleCheerExtension(event: EventSubExtensionBitsTransactionCreateEvent) {
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
-            this.socket?.send({
+            this.send(this.socket!!, {
                 type: 'CHEER',
                 cheerer: event.userDisplayName,
                 amount: event.productCost
             })
         }
+    }
+
+    private send(socket: WebSocket, message: any) {
+        socket?.send(JSON.stringify(message));
     }
 }
