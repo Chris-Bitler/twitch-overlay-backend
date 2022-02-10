@@ -1,12 +1,9 @@
-import { HelixUser } from "@twurple/api";
 import { ClientCredentialsAuthProvider } from "@twurple/auth";
 import { ApiClient } from "@twurple/api";
-import { EventSubListener, EventSubMiddleware } from "@twurple/eventsub";
-import { ReverseProxyAdapterWithWebsocket } from "./ReverseProxyAdapterWithWebsocket";
+import { EventSubMiddleware } from "@twurple/eventsub";
 import express from "express";
 import ws from "ws";
 import {WebSocketManager} from "./WebSocketManager";
-import http from "http";
 
 require('dotenv').config();
 
