@@ -23,9 +23,11 @@ export class EventHandler {
 
     handleWebsocketConnection(socket: WebSocket) {
         this.socket = socket;
+        console.log(`Setting up incoming websocket: ${socket}`)
         socket.on('pong', () => this.isAlive = true);
         socket.on('message', async (message: string) => {
             const messageObject = JSON.parse(message);
+            console.log(`Got message: ${message}`);
             if (messageObject.type === 'ADD_USER') {
                 const twitchUser = await this.apiClient.users.getUsersByNames([messageObject.user]);
                 if (twitchUser.length > 0) {
