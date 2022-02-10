@@ -1,14 +1,11 @@
 import WebSocket from "ws";
+import {EventSubMiddleware} from "@twurple/eventsub";
 
 export class WebSocketManager {
-    private static instance: WebSocketManager;
+    private expressMiddleware: EventSubMiddleware;
 
-    static get() {
-        if (WebSocketManager.instance === null) {
-            WebSocketManager.instance = new WebSocketManager();
-        }
-
-        return WebSocketManager.instance;
+    constructor(middleware: EventSubMiddleware) {
+        this.expressMiddleware = middleware;
     }
 
     handleNewConnection(socket: WebSocket) {}
