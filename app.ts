@@ -3,7 +3,8 @@ import { ApiClient } from "@twurple/api";
 import { EventSubMiddleware } from "@twurple/eventsub";
 import express from "express";
 import ws from "ws";
-import {WebSocketManager} from "./WebSocketManager";
+import {EventHandler} from "./EventHandler";
+import {SubscriptionHandler} from "./SubscriptionHandler";
 
 require('dotenv').config();
 
@@ -21,12 +22,13 @@ const middleware = new EventSubMiddleware({
     secret: eventSubSecret,
 });
 
-const websocketManager = new WebSocketManager(middleware);
+const subscriptionHandler = new SubscriptionHandler(middleware);
 
 const app = express();
 const wsServer = new ws.Server({ noServer: true, path: '/ws'});
 wsServer.on('connection', (socket) => {
-    websocketManager.handleNewConnection(socket);
+    const eventHandler = new EventHandler(apiClient, subscriptionHandler);
+    eventHandler.handleWebsocketConnection(socket);
 });
 
 middleware.apply(app);
