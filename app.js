@@ -17,7 +17,7 @@ const adapter = new ReverseProxyAdapter({
 
 const listener = new EventSubListener({ apiClient, adapter, secret: eventSubSecret});
 listener.listen().then(() => {
-    apiClient.users.getUsersByNames(["voidwhisperer"]).then(users => {
+    apiClient.users.getUsersByNames(["summit1g"]).then(users => {
         const toma = users[0];
         const id = toma.id;
         listener.subscribeToChannelFollowEvents(id, (e) => {
