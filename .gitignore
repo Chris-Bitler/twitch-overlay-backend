@@ -1,0 +1,5 @@
+.env
+.idea/*
+server.cert
+server.key
+node_modules/*
