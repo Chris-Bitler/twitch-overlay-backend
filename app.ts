@@ -35,12 +35,6 @@ middleware.apply(app);
 
 const server = app.listen(process.env.PORT!!, async () => {
     await middleware.markAsReady();
-    const users = await apiClient.users.getUsersByNames(['summit1g']);
-    const user = users[0];
-    const id = user.id;
-    await middleware.subscribeToChannelFollowEvents(id, (e) => {
-            console.log(`${e.userDisplayName} just followed!`);
-    });
 });
 
 server.on('upgrade', (request, socket, head) => {
