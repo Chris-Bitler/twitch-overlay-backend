@@ -67,6 +67,8 @@ export class EventHandler {
     }
 
     handleSub(event: EventSubChannelSubscriptionEvent) {
+        console.log(event.broadcasterId);
+        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
         if(!event.isGift && this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             // TODO: Query sub length here
             this.socket?.send({
