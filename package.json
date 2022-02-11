@@ -21,6 +21,7 @@
     "morgan": "~1.9.1",
     "passport-twitch": "^1.0.3",
     "pug": "2.0.0-beta11",
+    "socket.io": "^4.4.1",
     "ws": "^8.5.0"
   },
   "devDependencies": {
