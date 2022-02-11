@@ -43,11 +43,13 @@ export class EventHandler {
            if (!this.isAlive) {
                console.log('Closing websocket due to ping timeout');
                this.handleWebsocketConnectionClose(socket);
+               clearInterval(pingInterval)
            }
            this.isAlive = false;
            socket.ping();
         }, 30000);
-        socket.on('close', () => {
+        socket.on('close', (_socket, code) => {
+            console.log(`Socket being closed: ${code}`);
             this.handleWebsocketConnectionClose(socket);
             clearInterval(pingInterval)
         });
