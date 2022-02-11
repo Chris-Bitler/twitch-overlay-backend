@@ -12,7 +12,7 @@ import {SubscriptionHandler} from "./SubscriptionHandler";
 export class EventHandler {
     private usersHandlerListeningTo: string[] = [];
     private socket: WebSocket | null = null;
-    private isAlive: boolean = false;
+    private isAlive: boolean = true;
     private apiClient: ApiClient;
     private subscriptionHandler: SubscriptionHandler;
 
@@ -40,8 +40,10 @@ export class EventHandler {
             }
         });
         const pingInterval = setInterval(() => {
-            console.log('Ping interval')
-           if (!this.isAlive) this.handleWebsocketConnectionClose(socket);
+           if (!this.isAlive) {
+               console.log('Closing websocket due to ping timeout');
+               this.handleWebsocketConnectionClose(socket);
+           }
            this.isAlive = false;
            socket.ping();
         }, 30000);
@@ -60,6 +62,7 @@ export class EventHandler {
     }
 
     handleRaid(event: EventSubChannelRaidEvent) {
+        console.log(`Recieved Raid event - sending to ${this.usersHandlerListeningTo.length} clients`);
         if (this.usersHandlerListeningTo.includes(event.raidedBroadcasterId)) {
             this.send(this.socket!!, {
                 type: 'RAID',
@@ -70,8 +73,7 @@ export class EventHandler {
     }
 
     handleSub(event: EventSubChannelSubscriptionEvent) {
-        console.log(event.broadcasterId);
-        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
+        console.log(`Recieved Sub event - sending to ${this.usersHandlerListeningTo.length} clients`);
         if(!event.isGift && this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             // TODO: Query sub length here
             this.send(this.socket!!, {
@@ -82,8 +84,7 @@ export class EventHandler {
     }
 
     handleGiftSub(event: EventSubChannelSubscriptionGiftEvent) {
-        console.log(event.broadcasterId);
-        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
+        console.log(`Recieved Gift sub event - sending to ${this.usersHandlerListeningTo.length} clients`);
         if (this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             this.send(this.socket!!,{
                 type: 'GIFT_SUB',
@@ -95,8 +96,7 @@ export class EventHandler {
     }
 
     handleFollow(event: EventSubChannelFollowEvent) {
-        console.log(event.broadcasterId);
-        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
+        console.log(`Recieved Follow event - sending to ${this.usersHandlerListeningTo.length} clients`);
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             this.send(this.socket!!,{
                 type: 'FOLLOW',
@@ -106,7 +106,7 @@ export class EventHandler {
     }
 
     handleCheer(event: EventSubChannelCheerEvent) {
-        console.log(event.broadcasterId);
+        console.log(`Recieved Cheer event - sending to ${this.usersHandlerListeningTo.length} clients`);
         this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             this.send(this.socket!!,{
@@ -118,8 +118,6 @@ export class EventHandler {
     }
 
     handleCheerExtension(event: EventSubExtensionBitsTransactionCreateEvent) {
-        console.log(event.broadcasterId);
-        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             this.send(this.socket!!, {
                 type: 'CHEER',
