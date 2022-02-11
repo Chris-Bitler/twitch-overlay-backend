@@ -1,7 +1,7 @@
 import { EventSubMiddleware } from "@twurple/eventsub";
-import { Socket } from "socket.io";
+import { Server } from "socket.io";
 
-export const attemptSubscribe = (socket: Socket, middlewareInstance: EventSubMiddleware, targetUserId: string) => {
+export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMiddleware, targetUserId: string) => {
     middlewareInstance.subscribeToChannelRaidEventsTo(targetUserId, (event) => {
         console.log(`Raid event: ${targetUserId}`);
         const eventData = {

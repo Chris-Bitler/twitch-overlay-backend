@@ -42,7 +42,7 @@ io.on('connection', async (socket) => {
             const userId = helixUser.id;
             console.log(`Joined socket to room ${userId}`)
             socket.join(userId);
-            attemptSubscribe(socket, middleware, userId)
+            attemptSubscribe(io, middleware, userId)
         }
     }
     socket.on('disconnect', () => {
