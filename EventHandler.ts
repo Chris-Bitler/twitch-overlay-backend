@@ -24,7 +24,9 @@ export class EventHandler {
     handleWebsocketConnection(socket: WebSocket) {
         this.socket = socket;
         console.log(`Setting up incoming websocket: ${socket}`)
-        socket.on('pong', () => this.isAlive = true);
+        socket.on('pong', () => {
+            this.isAlive = true
+        });
         socket.on('message', async (message: string) => {
             const messageObject = JSON.parse(message);
             console.log(`Got message: ${message}`);
@@ -38,6 +40,7 @@ export class EventHandler {
             }
         });
         const pingInterval = setInterval(() => {
+            console.log('Ping interval')
            if (!this.isAlive) this.handleWebsocketConnectionClose(socket);
            this.isAlive = false;
            socket.ping();
