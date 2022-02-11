@@ -79,6 +79,8 @@ export class EventHandler {
     }
 
     handleGiftSub(event: EventSubChannelSubscriptionGiftEvent) {
+        console.log(event.broadcasterId);
+        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
         if (this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             this.send(this.socket!!,{
                 type: 'GIFT_SUB',
@@ -90,6 +92,8 @@ export class EventHandler {
     }
 
     handleFollow(event: EventSubChannelFollowEvent) {
+        console.log(event.broadcasterId);
+        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             this.send(this.socket!!,{
                 type: 'FOLLOW',
@@ -99,6 +103,8 @@ export class EventHandler {
     }
 
     handleCheer(event: EventSubChannelCheerEvent) {
+        console.log(event.broadcasterId);
+        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             this.send(this.socket!!,{
                 type: 'CHEER',
@@ -109,6 +115,8 @@ export class EventHandler {
     }
 
     handleCheerExtension(event: EventSubExtensionBitsTransactionCreateEvent) {
+        console.log(event.broadcasterId);
+        this.usersHandlerListeningTo.forEach((id) => console.log(`-${id}`));
         if(this.usersHandlerListeningTo.includes(event.broadcasterId)) {
             this.send(this.socket!!, {
                 type: 'CHEER',
