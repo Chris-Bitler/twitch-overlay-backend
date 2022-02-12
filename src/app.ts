@@ -15,6 +15,7 @@ const eventSubSecret = process.env.EVENTSUB_SECRET!!;
 const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
 const apiClient = new ApiClient({ authProvider });
 const app = express();
+
 const middleware = new EventSubMiddleware({
     apiClient,
     hostName: process.env.HOSTNAME!!,
@@ -47,9 +48,11 @@ io.on('connection', async (socket) => {
     }
     socket.on('disconnect', () => {
        console.log('user disconnected');
-    })
+    });
 });
 
 middleware.apply(app);
 
-server.listen(process.env.PORT);
+server.listen(process.env.PORT, async () => {
+    await middleware.markAsReady()
+});
