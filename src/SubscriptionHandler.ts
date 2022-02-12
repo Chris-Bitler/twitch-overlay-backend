@@ -33,7 +33,14 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
             };
             socket.to(targetUserId).emit('sub', eventData);
         }
-    })
+    });
+    middlewareInstance.subscribeToChannelSubscriptionMessageEvents(targetUserId, (event) => {
+        console.log(`Resub event: ${targetUserId}`);
+        const eventData = {
+            subber: event.userDisplayName
+        };
+        socket.to(targetUserId).emit('sub', eventData);
+    });
     middlewareInstance.subscribeToChannelSubscriptionGiftEvents(targetUserId, (event) => {
         console.log(`Gift sub event: ${targetUserId}`);
         const eventData = {
