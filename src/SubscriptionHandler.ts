@@ -27,10 +27,12 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
     });
     middlewareInstance.subscribeToChannelSubscriptionEvents(targetUserId, (event) => {
         console.log(`Sub event: ${targetUserId}`);
-        const eventData = {
-            subber: event.userDisplayName
-        };
-        socket.to(targetUserId).emit('sub', eventData);
+        if (!event.isGift) {
+            const eventData = {
+                subber: event.userDisplayName
+            };
+            socket.to(targetUserId).emit('sub', eventData);
+        }
     })
     middlewareInstance.subscribeToChannelSubscriptionGiftEvents(targetUserId, (event) => {
         console.log(`Gift sub event: ${targetUserId}`);
