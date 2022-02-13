@@ -66,7 +66,7 @@ export class RedeemStateManager {
         const oldState = await this.redisClient.getDel('redeem_state' as any);
         if (oldState) {
             const jsonState = JSON.parse(oldState!!);
-            for (const property of jsonState) {
+            for (const property of Object.getOwnPropertyNames(jsonState)) {
                 const broadcasterRedeemsState = jsonState[property];
                 const lastStartedAt = broadcasterRedeemsState.lastStartedAt;
                 const streams = await apiClient.streams.getStreams({userId: property});
