@@ -7,7 +7,7 @@ FROM node:alpine
 
 RUN apk add --no-cache curl
 
-COPY --from=builder dist/** dist/
+COPY --from=builder dist/ /dist/
 COPY package.json .
 COPY package-lock.json .
 RUN npm install --production
