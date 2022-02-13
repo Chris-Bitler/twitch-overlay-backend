@@ -1,15 +1,17 @@
 import {EventSubStreamOfflineEvent, EventSubStreamOnlineEvent} from "@twurple/eventsub";
-import {createClient, RedisClientType} from "redis";
+import {createClient} from "redis";
 import {ApiClient} from "@twurple/api";
 
 export class RedeemStateManager {
     redeemStates: {[key: string]: BroadcasterRedeems} = {};
     apiClient: ApiClient;
-    redisClient: RedisClientType;
+
+    // Hacky but the redis client type doesn't actually work very well with TS
+    redisClient: any;
 
     constructor(apiClient: ApiClient) {
         this.apiClient = apiClient;
-        const client = createClient({
+        this.redisClient = createClient({
             url: process.env.REDIS_URL
         });
     }
