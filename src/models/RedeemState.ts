@@ -81,7 +81,10 @@ export class RedeemStateManager {
         if (!this.redisClient.isOpen) {
             await this.redisClient.connect();
         }
-        const oldState = process.env.NODE_ENV !== 'development' ? await this.redisClient.getDel('redeem_state' as any) : await this.redisClient.get('redeem_state' as any) ;
+        const oldState = await this.redisClient.get('redeem_state' as any);
+        if (process.env.NODE_ENV !== 'development') {
+            await this.redisClient.del('redeem_state' as any);
+        }
         if (oldState) {
             const jsonState = JSON.parse(oldState!!);
             for (const property of Object.getOwnPropertyNames(jsonState)) {
