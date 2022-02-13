@@ -33,7 +33,7 @@ const io = new Server({
     }
 }).listen(server);
 
-const redeemStateManager = new RedeemStateManager();
+const redeemStateManager = new RedeemStateManager(apiClient);
 redeemStateManager.reloadRedeemsOnStartup(apiClient);
 
 process.on('exit', () => {

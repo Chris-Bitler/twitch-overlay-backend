@@ -1,11 +1,20 @@
-import {EventSubStreamOfflineEvent} from "@twurple/eventsub";
+import {EventSubStreamOfflineEvent, EventSubStreamOnlineEvent} from "@twurple/eventsub";
 import {createClient} from "redis";
 import {ApiClient} from "@twurple/api";
 
 export class RedeemStateManager {
-    redeemStates: {[key: string]: BroadcasterRedeems} = {}
+    redeemStates: {[key: string]: BroadcasterRedeems} = {};
+    apiClient: ApiClient;
+
+    constructor(apiClient: ApiClient) {
+        this.apiClient = apiClient;
+    }
 
     userGoesOffline(event: EventSubStreamOfflineEvent) {
+        delete this.redeemStates[event.broadcasterId];
+    }
+
+    userGoesOnline(event: EventSubStreamOnlineEvent) {
         delete this.redeemStates[event.broadcasterId];
     }
 
@@ -17,7 +26,7 @@ export class RedeemStateManager {
         return 0;
     }
 
-    incrementRedeemCount(targetUserId: string, rewardId: string) {
+    async incrementRedeemCount(targetUserId: string, rewardId: string) {
         const redeemState = this.redeemStates[targetUserId];
         if (redeemState) {
             const redeemCounter = redeemState.redeemCounters[rewardId];
@@ -27,6 +36,18 @@ export class RedeemStateManager {
             } else {
                 redeemState.redeemCounters[rewardId] = 1;
             }
+        } else {
+            const streams = await this.apiClient.streams.getStreams({userId: targetUserId});
+            if (streams.data.length > 0) {
+                const stream = streams.data[0];
+                this.redeemStates[targetUserId] = {
+                    lastStartedAt: stream.startDate,
+                    redeemCounters: {
+                        [rewardId]: 1
+                    }
+                }
+            }
+
         }
     }
 
