@@ -62,9 +62,9 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
         });
     }
     middlewareInstance.subscribeToStreamOfflineEvents(targetUserId, (event) => {
-       redeemStateManager.userGoesOffline(event);
+       redeemStateManager.userGoesOffline(socket, event);
     });
     middlewareInstance.subscribeToStreamOnlineEvents(targetUserId, (event) => {
-        redeemStateManager.userGoesOnline(event);
+        redeemStateManager.userGoesOnline(socket, event);
     })
 }

@@ -1,6 +1,7 @@
 import {EventSubStreamOfflineEvent, EventSubStreamOnlineEvent} from "@twurple/eventsub";
 import {createClient} from "redis";
 import {ApiClient} from "@twurple/api";
+import {Server} from "socket.io";
 
 export class RedeemStateManager {
     redeemStates: {[key: string]: BroadcasterRedeems} = {};
@@ -16,11 +17,25 @@ export class RedeemStateManager {
         });
     }
 
-    userGoesOffline(event: EventSubStreamOfflineEvent) {
+    userGoesOffline(socket: Server, event: EventSubStreamOfflineEvent) {
+        const rewardIds = Object.getOwnPropertyNames(this.redeemStates[event.broadcasterId]?.redeemCounters || {});
+        rewardIds.forEach((rewardId) => {
+            socket.to(event.broadcasterId).emit('reward_count', {
+                rewardId,
+                rewardAmount: 0
+            });
+        });
         delete this.redeemStates[event.broadcasterId];
     }
 
-    userGoesOnline(event: EventSubStreamOnlineEvent) {
+    userGoesOnline(socket: Server, event: EventSubStreamOnlineEvent) {
+        const rewardIds = Object.getOwnPropertyNames(this.redeemStates[event.broadcasterId]?.redeemCounters || {});
+        rewardIds.forEach((rewardId) => {
+            socket.to(event.broadcasterId).emit('reward_count', {
+                rewardId,
+                rewardAmount: 0
+            });
+        });
         delete this.redeemStates[event.broadcasterId];
     }
 
