@@ -6,6 +6,7 @@ import {Server} from "socket.io";
 export class RedeemStateManager {
     redeemStates: {[key: string]: BroadcasterRedeems} = {};
     apiClient: ApiClient;
+    currentStreamIds: {[key: string]: string} = {};
 
     // Hacky but the redis client type doesn't actually work very well with TS
     redisClient: any;
@@ -28,7 +29,8 @@ export class RedeemStateManager {
         delete this.redeemStates[event.broadcasterId];
     }
 
-    userGoesOnline(socket: Server, event: EventSubStreamOnlineEvent) {
+    async userGoesOnline(socket: Server, event: EventSubStreamOnlineEvent) {
+        this.currentStreamIds[event.broadcasterId] = (await event.getStream()).id
         const rewardIds = Object.getOwnPropertyNames(this.redeemStates[event.broadcasterId]?.redeemCounters || {});
         rewardIds.forEach((rewardId) => {
             socket.to(event.broadcasterId).emit('reward_count', {
@@ -59,7 +61,8 @@ export class RedeemStateManager {
             }
         } else {
             const streams = await this.apiClient.streams.getStreams({userId: targetUserId});
-            if (streams.data.length > 0) {
+            const streamId = streams?.data?.[0]?.id || this.currentStreamIds[targetUserId];
+            if (streamId) {
                 const stream = streams.data[0];
                 this.redeemStates[targetUserId] = {
                     streamId: stream.id,
