@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node dist/app.js",
-    "postinstall": "tsc",
+    "build": "tsc",
     "watch-node": "nodemon dist/app.js",
     "watch-ts": "tsc -w"
   },
