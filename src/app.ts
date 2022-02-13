@@ -65,7 +65,7 @@ io.on('connection', async (socket) => {
     });
 });
 
-//setup(io, middleware);
+setup(io, middleware);
 
 middleware.apply(app);
 
