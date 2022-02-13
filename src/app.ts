@@ -36,10 +36,6 @@ const io = new Server({
 const redeemStateManager = new RedeemStateManager(apiClient);
 redeemStateManager.reloadRedeemsOnStartup(apiClient);
 
-process.on('exit', () => {
-    redeemStateManager.saveRedeemsOnShutdown();
-});
-
 io.on('connection', async (socket) => {
     console.log('user connected');
     // @ts-ignore

@@ -1,13 +1,17 @@
 import {EventSubStreamOfflineEvent, EventSubStreamOnlineEvent} from "@twurple/eventsub";
-import {createClient} from "redis";
+import {createClient, RedisClientType} from "redis";
 import {ApiClient} from "@twurple/api";
 
 export class RedeemStateManager {
     redeemStates: {[key: string]: BroadcasterRedeems} = {};
     apiClient: ApiClient;
+    redisClient: RedisClientType;
 
     constructor(apiClient: ApiClient) {
         this.apiClient = apiClient;
+        const client = createClient({
+            url: process.env.REDIS_URL
+        });
     }
 
     userGoesOffline(event: EventSubStreamOfflineEvent) {
@@ -47,16 +51,17 @@ export class RedeemStateManager {
                     }
                 }
             }
-
         }
+
+        // TODO: This is pretty inefficient
+        await this.redisClient.set('redeem_state' as any, JSON.stringify(this.redeemStates) as any);
     }
 
     async reloadRedeemsOnStartup(apiClient: ApiClient) {
-        const client = createClient({
-            url: process.env.REDIS_URL
-        });
-        await client.connect();
-        const oldState = await client.getDel('redeem_state' as any);
+        if (!this.redisClient.isOpen) {
+            await this.redisClient.connect();
+        }
+        const oldState = await this.redisClient.getDel('redeem_state' as any);
         if (oldState) {
             const jsonState = JSON.parse(oldState!!);
             for (const property of jsonState) {
@@ -72,17 +77,9 @@ export class RedeemStateManager {
                 }
             }
         }
-        await client.disconnect();
-    }
-
-    async saveRedeemsOnShutdown() {
-        const client = createClient({
-            url: process.env.REDIS_URL
-        });
-        await client.connect();
-        await client.set('redeem_state' as any, JSON.stringify(this.redeemStates) as any);
     }
 }
+
 class BroadcasterRedeems {
     lastStartedAt?: Date;
 
