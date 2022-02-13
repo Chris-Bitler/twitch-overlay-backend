@@ -47,7 +47,7 @@ export class RedeemStateManager {
             if (streams.data.length > 0) {
                 const stream = streams.data[0];
                 this.redeemStates[targetUserId] = {
-                    lastStartedAt: stream.startDate,
+                    streamId: stream.id,
                     redeemCounters: {
                         [rewardId]: 1
                     }
@@ -63,17 +63,17 @@ export class RedeemStateManager {
         if (!this.redisClient.isOpen) {
             await this.redisClient.connect();
         }
-        const oldState = await this.redisClient.getDel('redeem_state' as any);
+        const oldState = process.env.NODE_ENV !== 'development' ? await this.redisClient.getDel('redeem_state' as any) : await this.redisClient.get('redeem_state' as any) ;
         if (oldState) {
             const jsonState = JSON.parse(oldState!!);
             for (const property of Object.getOwnPropertyNames(jsonState)) {
                 const broadcasterRedeemsState = jsonState[property];
-                const lastStartedAt = broadcasterRedeemsState.lastStartedAt;
+                const savedStreamId = broadcasterRedeemsState.streamId;
                 const streams = await apiClient.streams.getStreams({userId: property});
                 if (streams.data.length > 0) {
                     const stream = streams.data[0];
                     // If they are still on the same stream
-                    if (+lastStartedAt < +stream.startDate) {
+                    if (savedStreamId === stream.id) {
                         this.redeemStates[property] = broadcasterRedeemsState;
                     }
                 }
@@ -83,7 +83,7 @@ export class RedeemStateManager {
 }
 
 class BroadcasterRedeems {
-    lastStartedAt?: Date;
+    streamId?: string;
 
     // reward id - counter
     redeemCounters: {[key: string]: number} = {};
