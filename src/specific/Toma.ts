@@ -18,7 +18,7 @@ const checkIfShouldShowHamster = (io: Server, event: EventSubChannelRedemptionAd
     console.log(`Checking if should send message - ${event.broadcasterId} and ${event.rewardId}`);
     if (event.broadcasterId === TOMA_ID && event.rewardId === HAMSTER_REWARD) {
         io.to(TOMA_ID).emit('hamster', {
-            redeemer: event.userId,
+            redeemer: event.userDisplayName,
             id: event.id
         });
     }
