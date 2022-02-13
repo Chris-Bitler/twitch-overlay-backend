@@ -6,6 +6,7 @@ import { attemptSubscribe } from "./SubscriptionHandler";
 import http from 'http';
 import { Server } from 'socket.io';
 import {RedeemStateManager} from "./models/RedeemState";
+import {setup} from "./specific/Toma";
 
 require('dotenv').config();
 
@@ -63,6 +64,8 @@ io.on('connection', async (socket) => {
        console.log('user disconnected');
     });
 });
+
+setup(io, middleware);
 
 middleware.apply(app);
 
