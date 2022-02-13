@@ -1,7 +1,8 @@
 import { EventSubMiddleware } from "@twurple/eventsub";
 import { Server } from "socket.io";
+import { RedeemStateManager } from "./models/RedeemState";
 
-export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMiddleware, targetUserId: string) => {
+export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMiddleware, redeemStateManager: RedeemStateManager, targetUserId: string, rewardId: string) => {
     middlewareInstance.subscribeToChannelRaidEventsTo(targetUserId, (event) => {
         console.log(`Raid event: ${targetUserId}`);
         const eventData = {
@@ -49,5 +50,18 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
             cumulativeGiftAmount: event.cumulativeAmount ?? event.amount
         }
         socket.to(targetUserId).emit('gift_sub', eventData);
-    })
+    });
+    if (rewardId) {
+        middlewareInstance.subscribeToChannelRedemptionAddEventsForReward(targetUserId, rewardId, (event) => {
+            redeemStateManager.incrementRedeemCount(targetUserId, event.rewardId);
+            const eventData = {
+                rewardAmount: redeemStateManager.getRedeemCount(targetUserId, event.rewardId),
+                rewardId: event.rewardId
+            };
+            socket.to(targetUserId).emit('reward_count', eventData);
+        });
+    }
+    middlewareInstance.subscribeToStreamOfflineEvents(targetUserId, (event) => {
+       redeemStateManager.userGoesOffline(event);
+    });
 }

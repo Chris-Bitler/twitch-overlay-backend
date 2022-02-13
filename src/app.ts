@@ -5,6 +5,7 @@ import express from "express";
 import { attemptSubscribe } from "./SubscriptionHandler";
 import http from 'http';
 import { Server } from 'socket.io';
+import {RedeemStateManager} from "./models/RedeemState";
 
 require('dotenv').config();
 
@@ -27,15 +28,23 @@ const server = http.createServer(app);
 
 const io = new Server({
     cors: {
-        origin: 'https://twitch.voidwhisperer.info',
+        origin: ['https://twitch.voidwhisperer.info', 'http://localhost:3000'],
         methods: ['GET', 'POST']
     }
 }).listen(server);
+
+const redeemStateManager = new RedeemStateManager();
+redeemStateManager.reloadRedeemsOnStartup(apiClient);
+
+process.on('exit', () => {
+    redeemStateManager.saveRedeemsOnShutdown();
+});
 
 io.on('connection', async (socket) => {
     console.log('user connected');
     // @ts-ignore
     const user: string = socket?.handshake?.query?.user;
+    const rewardId: string | string[] | undefined = socket?.handshake?.query?.rewardId;
     if (user) {
         const users = await apiClient.users.getUsersByNames([user]);
         if (users.length > 0) {
@@ -43,7 +52,15 @@ io.on('connection', async (socket) => {
             const userId = helixUser.id;
             console.log(`Joined socket to room ${userId}`)
             socket.join(userId);
-            attemptSubscribe(io, middleware, userId)
+            attemptSubscribe(io, middleware, redeemStateManager, userId, rewardId as string ?? '');
+            if (rewardId) {
+                const eventData = {
+                    rewardAmount: redeemStateManager.getRedeemCount(userId, rewardId as string),
+                    rewardId: rewardId as string
+                };
+                console.log(`sent ${rewardId}`);
+                socket.to(userId).emit('reward_count', eventData);
+            }
         }
     }
     socket.on('disconnect', () => {
