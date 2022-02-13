@@ -54,12 +54,14 @@ io.on('connection', async (socket) => {
             socket.join(userId);
             attemptSubscribe(io, middleware, redeemStateManager, userId, rewardId as string ?? '');
             if (rewardId) {
-                const eventData = {
-                    rewardAmount: redeemStateManager.getRedeemCount(userId, rewardId as string),
-                    rewardId: rewardId as string
-                };
-                console.log(`sent ${rewardId}`);
-                socket.to(userId).emit('reward_count', eventData);
+                setTimeout(() => {
+                    const eventData = {
+                        rewardAmount: redeemStateManager.getRedeemCount(userId, rewardId as string),
+                        rewardId: rewardId as string
+                    };
+                    console.log(`sent ${rewardId}`);
+                    socket.to(userId).emit('reward_count', eventData);
+                }, 1000);
             }
         }
     }

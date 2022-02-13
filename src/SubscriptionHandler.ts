@@ -52,8 +52,8 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
         socket.to(targetUserId).emit('gift_sub', eventData);
     });
     if (rewardId) {
-        middlewareInstance.subscribeToChannelRedemptionAddEventsForReward(targetUserId, rewardId, (event) => {
-            redeemStateManager.incrementRedeemCount(targetUserId, event.rewardId);
+        middlewareInstance.subscribeToChannelRedemptionAddEventsForReward(targetUserId, rewardId, async (event) => {
+            await redeemStateManager.incrementRedeemCount(targetUserId, event.rewardId);
             const eventData = {
                 rewardAmount: redeemStateManager.getRedeemCount(targetUserId, event.rewardId),
                 rewardId: event.rewardId
