@@ -12,4 +12,4 @@ COPY package.json .
 COPY package-lock.json .
 RUN npm install --production
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/app.js"]
