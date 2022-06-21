@@ -18,7 +18,10 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
             viewers: event.viewers
         };
         socket.to(targetUserId).emit('raid', eventData);
-    }).then((sub: EventSubSubscription) => console.log(sub.getCliTestCommand()));
+    }).then(async (sub: EventSubSubscription) => {
+        const command = await sub.getCliTestCommand();
+        console.log(command);
+    });
     middlewareInstance.subscribeToChannelCheerEvents(targetUserId, (event: EventSubChannelCheerEvent) => {
         console.log(`Cheer event: ${targetUserId}`);
         const eventData = {
@@ -27,6 +30,9 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
             message: event.message,
         };
         socket.to(targetUserId).emit('cheer', eventData);
+    }).then(async (sub: EventSubSubscription) => {
+        const command = await sub.getCliTestCommand();
+        console.log(command);
     });
     middlewareInstance.subscribeToChannelFollowEvents(targetUserId, (event: EventSubChannelFollowEvent) => {
         console.log(`Follow event: ${targetUserId}`);
@@ -43,14 +49,20 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
             };
             socket.to(targetUserId).emit('sub', eventData);
         }
-    }).then((sub: EventSubSubscription) => console.log(sub.getCliTestCommand()));
+    }).then(async (sub: EventSubSubscription) => {
+        const command = await sub.getCliTestCommand();
+        console.log(command);
+    });
     middlewareInstance.subscribeToChannelSubscriptionMessageEvents(targetUserId, (event: EventSubChannelSubscriptionMessageEvent) => {
         console.log(`Resub event: ${targetUserId}`);
         const eventData = {
             subber: event.userDisplayName
         };
         socket.to(targetUserId).emit('sub', eventData);
-    }).then((sub: EventSubSubscription) => console.log(sub.getCliTestCommand()));
+    }).then(async (sub: EventSubSubscription) => {
+        const command = await sub.getCliTestCommand();
+        console.log(command);
+    });
     middlewareInstance.subscribeToChannelSubscriptionGiftEvents(targetUserId, (event: EventSubChannelSubscriptionGiftEvent) => {
         console.log(`Gift sub event: ${targetUserId}`);
         const eventData = {
@@ -59,7 +71,10 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
             cumulativeGiftAmount: event.cumulativeAmount ?? event.amount
         }
         socket.to(targetUserId).emit('gift_sub', eventData);
-    }).then((sub: EventSubSubscription) => console.log(sub.getCliTestCommand()));
+    }).then(async (sub: EventSubSubscription) => {
+        const command = await sub.getCliTestCommand();
+        console.log(command);
+    });
     middlewareInstance.subscribeToChannelRedemptionAddEvents(targetUserId, (event: EventSubChannelRedemptionAddEvent) => {
         console.log(`Redeem event: ${targetUserId}`);
         const eventData = {
@@ -68,5 +83,8 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
             id: event.rewardId,
         };
         socket.to(targetUserId).emit('redeem', eventData);
-    }).then((sub: EventSubSubscription) => console.log(sub.getCliTestCommand()));
+    }).then(async (sub: EventSubSubscription) => {
+        const command = await sub.getCliTestCommand();
+        console.log(command);
+    });
 }
