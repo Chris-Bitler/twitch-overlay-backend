@@ -1,12 +1,12 @@
 import { ClientCredentialsAuthProvider } from "@twurple/auth";
 import { ApiClient } from "@twurple/api";
 import { EventSubMiddleware } from "@twurple/eventsub";
+import tmi, {SubMethods, SubUserstate} from 'tmi.js';
 import express from "express";
-import { attemptSubscribe } from "./SubscriptionHandler";
 import http from 'http';
 import { Server } from 'socket.io';
-import {RedeemStateManager} from "./models/RedeemState";
-import {setup} from "./specific/Toma";
+import {chatHandler, hostHandler, joinedChannels, resubHandler, subHandler} from "./handler/ChatHandler";
+import {attemptSubscribe} from "./SubscriptionHandler";
 
 require('dotenv').config();
 
@@ -15,6 +15,7 @@ const clientSecret = process.env.TWITCH_CLIENT_SECRET!!;
 const eventSubSecret = process.env.EVENTSUB_SECRET!!;
 
 const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
+
 const apiClient = new ApiClient({ authProvider });
 const app = express();
 
@@ -29,45 +30,47 @@ const server = http.createServer(app);
 
 const io = new Server({
     cors: {
-        origin: 'https://twitch.voidwhisperer.info',
+        origin: 'http://localhost:3000',
         methods: ['GET', 'POST']
     }
 }).listen(server);
 
-const redeemStateManager = new RedeemStateManager(apiClient);
-redeemStateManager.reloadRedeemsOnStartup(apiClient);
+const chatClient = new tmi.Client({
+    identity: {
+        username: process.env.BOT_NAME,
+        password: process.env.BOT_TOKEN
+    }
+});
+
+chatClient.on('message', (channel, userstate, message, self) => chatHandler(io, channel, userstate, message, self));
+chatClient.on('hosted', (channel, username, viewers) => hostHandler(io, channel, username, viewers));
+chatClient.on('subscription', (channel: string, username: string, methods: SubMethods, message: string, userstate: SubUserstate) => subHandler(io, channel, username, methods, message, userstate));
+chatClient.on('resub', (channel: string, username: string, months: number, message: string, userstate: SubUserstate, methods: SubMethods) => resubHandler(io, channel, username, methods, message, userstate));
 
 io.on('connection', async (socket) => {
     console.log('user connected');
-    // @ts-ignore
-    const user: string = socket?.handshake?.query?.user;
-    const rewardId: string | string[] | undefined = socket?.handshake?.query?.rewardId;
+    const user: string | string[] | undefined = socket?.handshake?.query?.user;
+    console.log(`Connected to ${user}`);
     if (user) {
-        const users = await apiClient.users.getUsersByNames([user]);
+        const userString = user as string;
+        if (!joinedChannels.includes(userString)) {
+            chatClient.join(userString);
+            joinedChannels.push(userString);
+        }
+        const users = await apiClient.users.getUsersByNames([userString]);
         if (users.length > 0) {
             const helixUser = users[0];
             const userId = helixUser.id;
-            console.log(`Joined socket to room ${userId}`)
-            socket.join(userId);
-            attemptSubscribe(io, middleware, redeemStateManager, userId, rewardId as string ?? '');
-            if (rewardId) {
-                const eventData = {
-                    rewardAmount: redeemStateManager.getRedeemCount(userId, rewardId as string),
-                    rewardId: rewardId as string
-                };
-                console.log(`sent ${rewardId}`);
-                io.to(userId).emit('reward_count', eventData);
-            }
+            socket.join(userString);
+            console.log(`Joined socket to room ${userId}`);
+            attemptSubscribe(io, middleware, userId);
         }
     }
-    socket.on('disconnect', () => {
-       console.log('user disconnected');
-    });
 });
 
-setup(io, middleware);
-
 middleware.apply(app);
+
+chatClient.connect();
 
 server.listen(process.env.PORT, async () => {
     await middleware.markAsReady()

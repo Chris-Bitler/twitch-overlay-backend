@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node dist/app.js",
+    "start-dev": "tsc && node dist/app.js",
     "build": "tsc",
     "watch-node": "nodemon dist/app.js",
     "watch-ts": "tsc -w"
@@ -11,7 +12,9 @@
   "dependencies": {
     "@twurple/api": "^5.0.17",
     "@twurple/auth": "^5.0.17",
+    "@twurple/chat": "^5.0.19",
     "@twurple/eventsub": "^5.0.17",
+    "@types/tmi.js": "^1.8.1",
     "@types/ws": "^8.2.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
@@ -28,6 +31,7 @@
     "sequelize": "^6.16.1",
     "sequelize-typescript": "^2.1.2",
     "socket.io": "^4.4.1",
+    "tmi.js": "^1.8.5",
     "ws": "^8.5.0"
   },
   "devDependencies": {

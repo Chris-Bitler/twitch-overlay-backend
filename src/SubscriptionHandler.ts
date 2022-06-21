@@ -1,8 +1,7 @@
 import { EventSubMiddleware } from "@twurple/eventsub";
 import { Server } from "socket.io";
-import { RedeemStateManager } from "./models/RedeemState";
 
-export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMiddleware, redeemStateManager: RedeemStateManager, targetUserId: string, rewardId: string) => {
+export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMiddleware, targetUserId: string) => {
     middlewareInstance.subscribeToChannelRaidEventsTo(targetUserId, (event) => {
         console.log(`Raid event: ${targetUserId}`);
         const eventData = {
@@ -15,7 +14,8 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
         console.log(`Cheer event: ${targetUserId}`);
         const eventData = {
             cheerer: event.userDisplayName,
-            amount: event.bits
+            amount: event.bits,
+            message: event.message,
         };
         socket.to(targetUserId).emit('cheer', eventData);
     });
@@ -51,20 +51,13 @@ export const attemptSubscribe = (socket: Server, middlewareInstance: EventSubMid
         }
         socket.to(targetUserId).emit('gift_sub', eventData);
     });
-    if (rewardId) {
-        middlewareInstance.subscribeToChannelRedemptionAddEventsForReward(targetUserId, rewardId, async (event) => {
-            await redeemStateManager.incrementRedeemCount(targetUserId, event.rewardId);
-            const eventData = {
-                rewardAmount: redeemStateManager.getRedeemCount(targetUserId, event.rewardId),
-                rewardId: event.rewardId
-            };
-            socket.to(targetUserId).emit('reward_count', eventData);
-        });
-    }
-    middlewareInstance.subscribeToStreamOfflineEvents(targetUserId, (event) => {
-       redeemStateManager.userGoesOffline(socket, event);
+    middlewareInstance.subscribeToChannelRedemptionAddEvents(targetUserId, (event) => {
+        console.log(`Redeem event: ${targetUserId}`);
+        const eventData = {
+            redeemer: event.userDisplayName,
+            title: event.rewardTitle,
+            id: event.rewardId,
+        };
+        socket.to(targetUserId).emit('redeem', eventData);
     });
-    middlewareInstance.subscribeToStreamOnlineEvents(targetUserId, (event) => {
-        redeemStateManager.userGoesOnline(socket, event);
-    })
 }
