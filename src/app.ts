@@ -61,7 +61,7 @@ io.on('connection', async (socket) => {
         if (users.length > 0) {
             const helixUser = users[0];
             const userId = helixUser.id;
-            socket.join(userString);
+            socket.join(userId);
             console.log(`Joined socket to room ${userId}`);
             attemptSubscribe(io, middleware, userId);
         }
