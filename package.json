@@ -10,10 +10,10 @@
     "watch-ts": "tsc -w"
   },
   "dependencies": {
-    "@twurple/api": "^5.0.17",
-    "@twurple/auth": "^5.0.17",
-    "@twurple/chat": "^5.0.19",
-    "@twurple/eventsub": "^5.0.17",
+    "@twurple/api": "^5.1.5",
+    "@twurple/auth": "^5.1.5",
+    "@twurple/chat": "^5.1.5",
+    "@twurple/eventsub": "^5.1.5",
     "@types/tmi.js": "^1.8.1",
     "@types/ws": "^8.2.2",
     "cookie-parser": "~1.4.4",
