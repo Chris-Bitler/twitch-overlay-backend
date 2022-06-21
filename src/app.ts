@@ -30,7 +30,7 @@ const server = http.createServer(app);
 
 const io = new Server({
     cors: {
-        origin: 'https://ff288411.twitch-overlay-frontend.pages.dev',
+        origin: 'https://b60cc666.twitch-overlay-frontend.pages.dev/',
         methods: ['GET', 'POST']
     }
 }).listen(server);
