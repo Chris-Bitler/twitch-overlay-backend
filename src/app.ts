@@ -7,6 +7,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import {chatHandler, hostHandler, joinedChannels, resubHandler, subHandler} from "./handler/ChatHandler";
 import {attemptSubscribe} from "./SubscriptionHandler";
+import {UsernameMapper} from "./util/UsernameMapper";
 
 require('dotenv').config();
 
@@ -42,10 +43,36 @@ const chatClient = new tmi.Client({
     }
 });
 
-chatClient.on('message', (channel, userstate, message, self) => chatHandler(io, channel, userstate, message, self));
-chatClient.on('hosted', (channel, username, viewers) => hostHandler(io, channel, username, viewers));
-chatClient.on('subscription', (channel: string, username: string, methods: SubMethods, message: string, userstate: SubUserstate) => subHandler(io, channel, username, methods, message, userstate));
-chatClient.on('resub', (channel: string, username: string, months: number, message: string, userstate: SubUserstate, methods: SubMethods) => resubHandler(io, channel, username, methods, message, userstate));
+const usernameMapper = new UsernameMapper(apiClient);
+
+chatClient.on('message', async (channel, userstate, message, self) => {
+    const name = channel.replace('#', '');
+    const userId = await usernameMapper.fetchUserId(name);
+    if (userId) {
+        chatHandler(io, userId, userstate, message, self);
+    }
+});
+chatClient.on('hosted', async (channel, username, viewers) => {
+    const name = channel.replace('#', '');
+    const userId = await usernameMapper.fetchUserId(name);
+    if (userId) {
+        hostHandler(io, userId, username, viewers);
+    }
+});
+chatClient.on('subscription', async (channel: string, username: string, methods: SubMethods, message: string, userstate: SubUserstate) => {
+    const name = channel.replace('#', '');
+    const userId = await usernameMapper.fetchUserId(name);
+    if (userId) {
+        subHandler(io, userId, username, methods, message, userstate);
+    }
+});
+chatClient.on('resub', async (channel: string, username: string, months: number, message: string, userstate: SubUserstate, methods: SubMethods) => {
+    const name = channel.replace('#', '');
+    const userId = await usernameMapper.fetchUserId(name);
+    if (userId) {
+        resubHandler(io, userId, username, methods, message, userstate)
+    }
+});
 
 io.on('connection', async (socket) => {
     console.log('user connected');
@@ -57,9 +84,12 @@ io.on('connection', async (socket) => {
             chatClient.join(userString);
             joinedChannels.push(userString);
         }
-        socket.join(userString);
-        console.log(`Joined socket to room ${userString}`);
-        attemptSubscribe(io, middleware, userString);
+        const userId = await usernameMapper.fetchUserId(userString, false);
+        if (userId) {
+            socket.join(userId);
+            console.log(`Joined socket to room ${userId}`);
+            attemptSubscribe(io, middleware, userId);
+        }
     }
 });
 
