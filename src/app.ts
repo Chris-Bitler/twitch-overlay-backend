@@ -31,7 +31,7 @@ const server = http.createServer(app);
 
 const io = new Server({
     cors: {
-        origin: 'https://twitch.voidwhisperer.info/',
+        origin: ['https://dev.twitch-overlay-frontend.pages.dev','https://twitch.voidwhisperer.info'],
         methods: ['GET', 'POST']
     }
 }).listen(server);
