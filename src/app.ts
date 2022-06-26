@@ -57,14 +57,9 @@ io.on('connection', async (socket) => {
             chatClient.join(userString);
             joinedChannels.push(userString);
         }
-        const users = await apiClient.users.getUsersByNames([userString]);
-        if (users.length > 0) {
-            const helixUser = users[0];
-            const userId = helixUser.id;
-            socket.join(userId);
-            console.log(`Joined socket to room ${userId}`);
-            attemptSubscribe(io, middleware, userId);
-        }
+        socket.join(userString);
+        console.log(`Joined socket to room ${userString}`);
+        attemptSubscribe(io, middleware, userString);
     }
 });
 
